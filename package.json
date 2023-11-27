@@ -8,6 +8,7 @@
     "@aws-cdk/aws-apigatewayv2-alpha": "2.110.0-alpha.0",
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "2.110.0-alpha.0",
     "@aws-sdk/client-dynamodb": "^3.458.0",
+    "aws-cdk": "2.110.1",
     "aws-cdk-lib": "2.110.1",
     "constructs": "^10",
     "querystring": "^0.2.1",

@@ -154,7 +154,7 @@ export class AngularCourseStack extends cdk.Stack {
         originConfigs: [
           {
             customOriginSource: {
-              domainName: httpApi.url!,
+              domainName: `${httpApi.httpApiId}.execute-api.${this.region}.amazonaws.com`,
               originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTPS_ONLY,
             },
             behaviors: [
