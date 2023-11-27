@@ -172,7 +172,8 @@ export class AngularCourseStack extends cdk.Stack {
                 "dynamodb:DeleteTable",
               ],
               resources: [
-                `arn:aws:dynamodb:${this.region}:${this.account}:table/rsschool-2023-*`,
+                `arn:aws:dynamodb:${this.region}:${this.account}:table/group-*`,
+                `arn:aws:dynamodb:${this.region}:${this.account}:table/conversation-*`,
               ],
             }),
           ],
