@@ -14,6 +14,93 @@ type Props = cdk.StackProps & {
   certificateArn: string;
 };
 
+const angularTaskApi: {
+  path: string;
+  method: string;
+  lambdaName: string;
+}[] = [
+  {
+    path: "/login",
+    method: "POST",
+    lambdaName: "login",
+  },
+  {
+    path: "/logout",
+    method: "DELETE",
+    lambdaName: "logout",
+  },
+  {
+    path: "/registration",
+    method: "POST",
+    lambdaName: "registration",
+  },
+  {
+    path: "/users",
+    method: "GET",
+    lambdaName: "users",
+  },
+  {
+    path: "/profile",
+    method: "GET",
+    lambdaName: "profile-read",
+  },
+  {
+    path: "/profile",
+    method: "PUT",
+    lambdaName: "profile-update",
+  },
+  {
+    path: "/conversations/list",
+    method: "GET",
+    lambdaName: "list-my-conversations",
+  },
+  {
+    path: "/conversations/create",
+    method: "POST",
+    lambdaName: "create-personal-conversation",
+  },
+  {
+    path: "/conversations/delete",
+    method: "DELETE",
+    lambdaName: "delete-personal-conversation",
+  },
+  {
+    path: "/conversations/read",
+    method: "GET",
+    lambdaName: "conversation-read-messages",
+  },
+  {
+    path: "/conversations/append",
+    method: "POST",
+    lambdaName: "conversation-add-message",
+  },
+  {
+    path: "/groups/list",
+    method: "GET",
+    lambdaName: "groups-list",
+  },
+  {
+    path: "/groups/create",
+    method: "POST",
+    lambdaName: "groups-create",
+  },
+  {
+    path: "/groups/delete",
+    method: "DELETE",
+    lambdaName: "groups-delete",
+  },
+  {
+    path: "/groups/read",
+    method: "GET",
+    lambdaName: "groups-read-messages",
+  },
+  {
+    path: "/groups/append",
+    method: "POST",
+    lambdaName: "groups-add-message",
+  },
+];
+
 export class AngularCourseStack extends cdk.Stack {
   fqdn: string;
   url: string;
@@ -26,96 +113,9 @@ export class AngularCourseStack extends cdk.Stack {
     this.fqdn = `tasks.app.rs.school`;
     this.url = `https://${this.fqdn}`;
 
-    const api: {
-      path: string;
-      method: string;
-      lambdaName: string;
-    }[] = [
-      {
-        path: "/login",
-        method: "POST",
-        lambdaName: "login",
-      },
-      {
-        path: "/logout",
-        method: "DELETE",
-        lambdaName: "logout",
-      },
-      {
-        path: "/registration",
-        method: "POST",
-        lambdaName: "registration",
-      },
-      {
-        path: "/users",
-        method: "GET",
-        lambdaName: "users",
-      },
-      {
-        path: "/profile",
-        method: "GET",
-        lambdaName: "profile-read",
-      },
-      {
-        path: "/profile",
-        method: "PUT",
-        lambdaName: "profile-update",
-      },
-      {
-        path: "/conversations/list",
-        method: "GET",
-        lambdaName: "list-my-conversations",
-      },
-      {
-        path: "/conversations/create",
-        method: "POST",
-        lambdaName: "create-personal-conversation",
-      },
-      {
-        path: "/conversations/delete",
-        method: "DELETE",
-        lambdaName: "delete-personal-conversation",
-      },
-      {
-        path: "/conversations/read",
-        method: "GET",
-        lambdaName: "conversation-read-messages",
-      },
-      {
-        path: "/conversations/append",
-        method: "POST",
-        lambdaName: "conversation-add-message",
-      },
-      {
-        path: "/groups/list",
-        method: "GET",
-        lambdaName: "groups-list",
-      },
-      {
-        path: "/groups/create",
-        method: "POST",
-        lambdaName: "groups-create",
-      },
-      {
-        path: "/groups/delete",
-        method: "DELETE",
-        lambdaName: "groups-delete",
-      },
-      {
-        path: "/groups/read",
-        method: "GET",
-        lambdaName: "groups-read-messages",
-      },
-      {
-        path: "/groups/append",
-        method: "POST",
-        lambdaName: "groups-add-message",
-      },
-    ];
-
     const httpApi = new apiv2.HttpApi(this, "HttpApi");
 
-    for (const route of api) {
+    for (const route of angularTaskApi) {
       new apiv2.HttpRoute(this, `Route-${route.path}-${route.method}`, {
         httpApi,
         integration: new integration.HttpLambdaIntegration(
