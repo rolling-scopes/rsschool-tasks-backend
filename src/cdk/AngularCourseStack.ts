@@ -121,6 +121,14 @@ export class AngularCourseStack extends cdk.Stack {
     const lambdaRole = new iam.Role(this, `AngularTaskLambdaRole`, {
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
       inlinePolicies: {
+        cloudWatch: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              actions: ["logs:*"],
+              resources: ["arn:aws:logs:*:*:*"],
+            }),
+          ],
+        }),
         lambdaRole: new iam.PolicyDocument({
           statements: [
             new iam.PolicyStatement({
