@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as alias from "aws-cdk-lib/aws-route53-targets";
 import * as apiv2 from "@aws-cdk/aws-apigatewayv2-alpha";
@@ -6,7 +7,6 @@ import * as integration from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import { Construct } from "constructs";
-import { CfnOutput } from "aws-cdk-lib";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { HttpMethod } from "@aws-cdk/aws-apigatewayv2-alpha";
@@ -118,19 +118,41 @@ export class AngularCourseStack extends cdk.Stack {
 
     const httpApi = new apiv2.HttpApi(this, "AngularTask");
 
+    const lambdaRole = new iam.Role(this, `AngularTaskLambdaRole`, {
+      assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+      inlinePolicies: {
+        lambdaRole: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              actions: ["dynamodb:*"],
+              resources: [
+                `arn:aws:dynamodb:${this.region}:${this.account}:table/rsschool-*`,
+              ],
+            }),
+          ],
+        }),
+      },
+    });
+
     for (const route of angularTaskApi) {
+      const lambda = new NodejsFunction(
+        this,
+        `AngularTask-${route.lambdaName}`,
+        {
+          entry: `./src/functions/${route.lambdaName}.ts`,
+          memorySize: 256,
+          runtime: Runtime.NODEJS_20_X,
+          bundling: {
+            externalModules: ["@aws-sdk/*"],
+          },
+          role: lambdaRole,
+        }
+      );
       new apiv2.HttpRoute(this, `Route-${route.path}-${route.method}`, {
         httpApi,
         integration: new integration.HttpLambdaIntegration(
           `Integration-${route.path}-${route.method}`,
-          new NodejsFunction(this, `AngularTask-${route.lambdaName}`, {
-            entry: `./src/functions/${route.lambdaName}.ts`,
-            memorySize: 256,
-            runtime: Runtime.NODEJS_20_X,
-            bundling: {
-              externalModules: ["@aws-sdk/*"],
-            },
-          })
+          lambda
         ),
         routeKey: apiv2.HttpRouteKey.with(
           `${baseUrl}${route.path}`,
@@ -196,6 +218,6 @@ export class AngularCourseStack extends cdk.Stack {
       recordName: this.fqdn,
     });
 
-    new CfnOutput(this, "API Url", { value: `${this.url}${baseUrl}` });
+    new cdk.CfnOutput(this, "API Url", { value: `${this.url}${baseUrl}` });
   }
 }
