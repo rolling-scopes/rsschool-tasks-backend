@@ -38,9 +38,10 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     ExpressionAttributeNames: {
       "#ID": "id",
       "#N": "name",
-      "#C": "createdAt",
+      "#CA": "createdAt",
+      "#CB": "createdBy",
     },
-    ProjectionExpression: "#ID, #N, #C",
+    ProjectionExpression: "#ID, #N, #CA, #CB",
   });
 
   const result = await client.send(command);
