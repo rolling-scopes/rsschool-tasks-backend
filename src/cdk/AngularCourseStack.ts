@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as alias from "aws-cdk-lib/aws-route53-targets";
 import * as apiv2 from "@aws-cdk/aws-apigatewayv2-alpha";
@@ -118,6 +119,33 @@ export class AngularCourseStack extends cdk.Stack {
 
     const httpApi = new apiv2.HttpApi(this, "AngularTask");
 
+    const usersTable = new dynamodb.Table(this, "UsersTable", {
+      tableName: "rsschool-2023-users",
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      partitionKey: {
+        name: "email",
+        type: dynamodb.AttributeType.STRING,
+      },
+    });
+
+    const groupsTable = new dynamodb.Table(this, "GroupsTable", {
+      tableName: "rsschool-2023-groups",
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      partitionKey: {
+        name: "id",
+        type: dynamodb.AttributeType.STRING,
+      },
+    });
+
+    const conversationsTable = new dynamodb.Table(this, "ConversationsTable", {
+      tableName: "rsschool-2023-conversations",
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      partitionKey: {
+        name: "id",
+        type: dynamodb.AttributeType.STRING,
+      },
+    });
+
     const lambdaRole = new iam.Role(this, `AngularTaskLambdaRole`, {
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
       inlinePolicies: {
@@ -132,9 +160,38 @@ export class AngularCourseStack extends cdk.Stack {
         lambdaRole: new iam.PolicyDocument({
           statements: [
             new iam.PolicyStatement({
-              actions: ["dynamodb:*"],
+              actions: [
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:CreateTable",
+                "dynamodb:DescribeTable",
+                "dynamodb:DeleteTable",
+              ],
               resources: [
-                `arn:aws:dynamodb:${this.region}:${this.account}:table/rsschool-*`,
+                `arn:aws:dynamodb:${this.region}:${this.account}:table/rsschool-2023-*`,
+              ],
+            }),
+          ],
+        }),
+        usersTable: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              actions: [
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+              ],
+              resources: [
+                usersTable.tableArn,
+                groupsTable.tableArn,
+                conversationsTable.tableArn,
               ],
             }),
           ],
