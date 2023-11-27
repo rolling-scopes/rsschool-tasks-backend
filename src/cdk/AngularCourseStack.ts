@@ -114,14 +114,14 @@ export class AngularCourseStack extends cdk.Stack {
     this.fqdn = `tasks.app.rs.school`;
     this.url = `https://${this.fqdn}`;
 
-    const httpApi = new apiv2.HttpApi(this, "HttpApi");
+    const httpApi = new apiv2.HttpApi(this, "AngularTask");
 
     for (const route of angularTaskApi) {
       new apiv2.HttpRoute(this, `Route-${route.path}-${route.method}`, {
         httpApi,
         integration: new integration.HttpLambdaIntegration(
           `Integration-${route.path}-${route.method}`,
-          new NodejsFunction(this, `Lambda-${route.lambdaName}`, {
+          new NodejsFunction(this, `AngularTask-${route.lambdaName}`, {
             entry: `./src/functions/${route.lambdaName}.ts`,
             memorySize: 256,
             runtime: Runtime.NODEJS_20_X,
