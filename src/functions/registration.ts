@@ -1,25 +1,26 @@
 import querystring from "querystring";
 import crypto from "crypto";
+import { APIGatewayProxyEventV2 } from "aws-lambda";
 
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 
 const client = new DynamoDBClient({ region: "eu-central-1" });
 
-export const handler = async (event) => {
+export const handler = async (event: APIGatewayProxyEventV2) => {
   console.log("-event", event);
 
   const contentType =
     event.headers["content-type"] ?? event.headers["Content-Type"];
 
   let body = event.body;
-  let data;
+  let data: Record<string, string>;
 
   if (event.isBase64Encoded) {
     body = new Buffer(body, "base64").toString("utf-8");
   }
 
   if (contentType === "application/x-www-form-urlencoded") {
-    data = querystring.parse(body);
+    data = querystring.parse(body) as Record<string, string>;
   } else if (contentType?.startsWith("multipart/form-data")) {
     const match = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/);
     const boundary = match[1] ?? match[2];
@@ -126,7 +127,7 @@ export const handler = async (event) => {
       statusCode: 201,
     };
   } catch (err) {
-    if (err.name === "ConditionalCheckFailedException") {
+    if ((err as Error).name === "ConditionalCheckFailedException") {
       // user already exists
 
       return {

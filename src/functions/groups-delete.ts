@@ -3,17 +3,16 @@ import {
   DeleteItemCommand,
   DeleteTableCommand,
 } from "@aws-sdk/client-dynamodb";
+import { APIGatewayProxyEventV2 } from "aws-lambda";
 
 const client = new DynamoDBClient({ region: "eu-central-1" });
 
-export const handler = async (event) => {
+export const handler = async (event: APIGatewayProxyEventV2) => {
   console.log("-event", event);
   const userEmail = event.headers["rs-email"];
   const userID = event.headers["rs-uid"];
   const userTokenRaw =
     event.headers["Authorization"] ?? event.headers["authorization"];
-  const contentType =
-    event.headers["content-type"] ?? event.headers["Content-Type"];
 
   if (!(userEmail && userID && userTokenRaw)) {
     return {
@@ -76,7 +75,7 @@ export const handler = async (event) => {
 
     console.log("-delete item", result);
   } catch (err) {
-    if (err.name === "ConditionalCheckFailedException") {
+    if ((err as Error).name === "ConditionalCheckFailedException") {
       return {
         statusCode: 400,
         body: JSON.stringify({

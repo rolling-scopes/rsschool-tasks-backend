@@ -1,14 +1,16 @@
 import querystring from "querystring";
 
 import {
+  CreateTableCommand,
+  CreateTableInput,
   DynamoDBClient,
   PutItemCommand,
-  CreateTableCommand,
 } from "@aws-sdk/client-dynamodb";
+import { APIGatewayProxyEventV2 } from "aws-lambda";
 
 const client = new DynamoDBClient({ region: "eu-central-1" });
 
-export const handler = async (event) => {
+export const handler = async (event: APIGatewayProxyEventV2) => {
   const userEmail = event.headers["rs-email"];
   const userID = event.headers["rs-uid"];
   const userTokenRaw =
@@ -41,14 +43,14 @@ export const handler = async (event) => {
   }
 
   let body = event.body;
-  let data;
+  let data: Record<string, string>;
 
   if (event.isBase64Encoded) {
     body = new Buffer(body, "base64").toString("utf-8");
   }
 
   if (contentType === "application/x-www-form-urlencoded") {
-    data = querystring.parse(body);
+    data = querystring.parse(body) as Record<string, string>;
   } else if (contentType?.startsWith("multipart/form-data")) {
     const match = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/);
     const boundary = match[1] ?? match[2];
@@ -111,7 +113,7 @@ export const handler = async (event) => {
   const groupID = Math.random().toString(36).substring(2);
 
   // create dedicated group table
-  const newTableInput = {
+  const newTableInput: CreateTableInput = {
     TableName: `group-${groupID}`,
     BillingMode: "PAY_PER_REQUEST",
     TableClass: "STANDARD",
@@ -133,7 +135,7 @@ export const handler = async (event) => {
   };
   const newTableCommand = new CreateTableCommand(newTableInput);
 
-  let result = await client.send(newTableCommand);
+  await client.send(newTableCommand);
 
   // save conversation id in list
   const input = {
@@ -157,7 +159,7 @@ export const handler = async (event) => {
 
   const command = new PutItemCommand(input);
 
-  result = await client.send(command);
+  await client.send(command);
 
   return {
     statusCode: 201,

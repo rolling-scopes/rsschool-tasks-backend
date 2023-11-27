@@ -1,15 +1,18 @@
-import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBClient,
+  ScanCommand,
+  ScanCommandInput,
+} from "@aws-sdk/client-dynamodb";
+import { APIGatewayProxyEventV2 } from "aws-lambda";
 
 const client = new DynamoDBClient({ region: "eu-central-1" });
 
-export const handler = async (event) => {
+export const handler = async (event: APIGatewayProxyEventV2) => {
   console.log("-event", event);
   const userEmail = event.headers["rs-email"];
   const userID = event.headers["rs-uid"];
   const userTokenRaw =
     event.headers["Authorization"] ?? event.headers["authorization"];
-  const contentType =
-    event.headers["content-type"] ?? event.headers["Content-Type"];
 
   if (!(userEmail && userID && userTokenRaw)) {
     return {
@@ -49,7 +52,7 @@ export const handler = async (event) => {
   }
   console.log("-conversation", groupID, since);
 
-  let input = {
+  let input: ScanCommandInput = {
     TableName: `group-${groupID}`,
     ProjectionExpression: "#A, #M, #C",
     ExpressionAttributeNames: {
@@ -83,7 +86,7 @@ export const handler = async (event) => {
       body: JSON.stringify(result),
     };
   } catch (err) {
-    if (err.name === "ResourceNotFoundException") {
+    if ((err as Error).name === "ResourceNotFoundException") {
       return {
         statusCode: 400,
         body: JSON.stringify({

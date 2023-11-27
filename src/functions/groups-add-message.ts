@@ -1,9 +1,10 @@
 import querystring from "querystring";
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { APIGatewayProxyEventV2 } from "aws-lambda";
 
 const client = new DynamoDBClient({ region: "eu-central-1" });
 
-export const handler = async (event) => {
+export const handler = async (event: APIGatewayProxyEventV2) => {
   console.log("-event", event);
   const userID = event.headers["rs-uid"];
   const userEmail = event.headers["rs-email"];
@@ -37,14 +38,14 @@ export const handler = async (event) => {
   }
 
   let body = event.body;
-  let data;
+  let data: Record<string, string>;
 
   if (event.isBase64Encoded) {
     body = new Buffer(body, "base64").toString("utf-8");
   }
 
   if (contentType === "application/x-www-form-urlencoded") {
-    data = querystring.parse(body);
+    data = querystring.parse(body) as Record<string, string>;
   } else if (contentType?.startsWith("multipart/form-data")) {
     const match = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/);
     const boundary = match[1] ?? match[2];
@@ -127,7 +128,7 @@ export const handler = async (event) => {
 
     console.log("-result", result);
   } catch (err) {
-    if (err.name === "ResourceNotFoundException") {
+    if ((err as Error).name === "ResourceNotFoundException") {
       return {
         statusCode: 400,
         body: JSON.stringify({

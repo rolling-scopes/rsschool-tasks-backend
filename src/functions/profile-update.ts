@@ -1,15 +1,11 @@
+import { APIGatewayProxyEventV2 } from "aws-lambda";
 import querystring from "querystring";
-import crypto from "crypto";
 
-import {
-  DynamoDBClient,
-  UpdateItemCommand,
-  GetItemCommand,
-} from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 
 const client = new DynamoDBClient({ region: "eu-central-1" });
 
-export const handler = async (event) => {
+export const handler = async (event: APIGatewayProxyEventV2) => {
   console.log("-event", event);
 
   const userID = event.headers["rs-uid"];
@@ -44,14 +40,14 @@ export const handler = async (event) => {
   }
 
   let body = event.body;
-  let data;
+  let data: Record<string, string>;
 
   if (event.isBase64Encoded) {
     body = new Buffer(body, "base64").toString("utf-8");
   }
 
   if (contentType === "application/x-www-form-urlencoded") {
-    data = querystring.parse(body);
+    data = querystring.parse(body) as Record<string, string>;
   } else if (contentType?.startsWith("multipart/form-data")) {
     const match = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/);
     const boundary = match[1] ?? match[2];
@@ -140,7 +136,7 @@ export const handler = async (event) => {
   try {
     await client.send(updateCommand);
   } catch (err) {
-    if (err.name === "ConditionalCheckFailedException") {
+    if ((err as Error).name === "ConditionalCheckFailedException") {
       return {
         statusCode: 400,
         body: JSON.stringify({

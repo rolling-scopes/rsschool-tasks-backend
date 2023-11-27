@@ -5,11 +5,14 @@ import {
   PutItemCommand,
   ScanCommand,
   CreateTableCommand,
+  ScanInput,
+  CreateTableCommandInput,
 } from "@aws-sdk/client-dynamodb";
+import { APIGatewayProxyEventV2 } from "aws-lambda";
 
 const client = new DynamoDBClient({ region: "eu-central-1" });
 
-export const handler = async (event) => {
+export const handler = async (event: APIGatewayProxyEventV2) => {
   const userEmail = event.headers["rs-email"];
   const userID = event.headers["rs-uid"];
   const userTokenRaw =
@@ -40,14 +43,14 @@ export const handler = async (event) => {
   }
 
   let body = event.body;
-  let data;
+  let data: Record<string, string>;
 
   if (event.isBase64Encoded) {
     body = new Buffer(body, "base64").toString("utf-8");
   }
 
   if (contentType === "application/x-www-form-urlencoded") {
-    data = querystring.parse(body);
+    data = querystring.parse(body) as Record<string, string>;
   } else if (contentType?.startsWith("multipart/form-data")) {
     const match = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/);
     const boundary = match[1] ?? match[2];
@@ -106,7 +109,7 @@ export const handler = async (event) => {
 
   const [user1, user2] = sortingData;
 
-  const queryInput = {
+  const queryInput: ScanInput = {
     TableName: "rsschool-2023-conversations",
     FilterExpression: "user1 = :user1Value AND user2 = :user2Value",
     ExpressionAttributeValues: {
@@ -138,7 +141,7 @@ export const handler = async (event) => {
   const conversationID = Math.random().toString(36).substring(2);
 
   // create dedicated conversation table
-  const newTableInput = {
+  const newTableInput: CreateTableCommandInput = {
     TableName: `conversation-${conversationID}`,
     BillingMode: "PAY_PER_REQUEST",
     TableClass: "STANDARD",

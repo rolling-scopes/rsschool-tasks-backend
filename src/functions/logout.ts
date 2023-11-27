@@ -1,8 +1,9 @@
 import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
+import { APIGatewayProxyEventV2 } from "aws-lambda";
 
 const client = new DynamoDBClient({ region: "eu-central-1" });
 
-export const handler = async (event) => {
+export const handler = async (event: APIGatewayProxyEventV2) => {
   console.log("-event", event);
 
   const userID = event.headers["rs-uid"];
@@ -69,7 +70,7 @@ export const handler = async (event) => {
   } catch (err) {
     console.log("-error", err);
 
-    if (err.name === "ConditionalCheckFailedException") {
+    if ((err as Error).name === "ConditionalCheckFailedException") {
       return {
         statusCode: 400,
         body: JSON.stringify({

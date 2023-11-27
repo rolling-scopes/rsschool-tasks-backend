@@ -1,8 +1,9 @@
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
+import { APIGatewayProxyEventV2 } from "aws-lambda";
 
 const client = new DynamoDBClient({ region: "eu-central-1" });
 
-export const handler = async (event) => {
+export const handler = async (event: APIGatewayProxyEventV2) => {
   const userEmail = event.headers["rs-email"];
   const userID = event.headers["rs-uid"];
   const userTokenRaw =
