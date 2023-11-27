@@ -8,7 +8,7 @@ import * as integration from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
-import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { Runtime, Architecture } from "aws-cdk-lib/aws-lambda";
 import { HttpMethod } from "@aws-cdk/aws-apigatewayv2-alpha";
 
 type Props = cdk.StackProps & {
@@ -146,6 +146,8 @@ export class AngularCourseStack extends cdk.Stack {
             externalModules: ["@aws-sdk/*"],
           },
           role: lambdaRole,
+          timeout: cdk.Duration.seconds(30),
+          architecture: Architecture.ARM_64,
         }
       );
       new apiv2.HttpRoute(this, `Route-${route.path}-${route.method}`, {
