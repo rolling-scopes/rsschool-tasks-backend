@@ -9,6 +9,7 @@ import { Construct } from "constructs";
 import { CfnOutput } from "aws-cdk-lib";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { HttpMethod } from "@aws-cdk/aws-apigatewayv2-alpha";
 
 type Props = cdk.StackProps & {
   certificateArn: string;
@@ -16,87 +17,87 @@ type Props = cdk.StackProps & {
 
 const angularTaskApi: {
   path: string;
-  method: string;
+  method: HttpMethod;
   lambdaName: string;
 }[] = [
   {
     path: "/login",
-    method: "POST",
+    method: HttpMethod.POST,
     lambdaName: "login",
   },
   {
     path: "/logout",
-    method: "DELETE",
+    method: HttpMethod.DELETE,
     lambdaName: "logout",
   },
   {
     path: "/registration",
-    method: "POST",
+    method: HttpMethod.POST,
     lambdaName: "registration",
   },
   {
     path: "/users",
-    method: "GET",
+    method: HttpMethod.GET,
     lambdaName: "users",
   },
   {
     path: "/profile",
-    method: "GET",
+    method: HttpMethod.GET,
     lambdaName: "profile-read",
   },
   {
     path: "/profile",
-    method: "PUT",
+    method: HttpMethod.PUT,
     lambdaName: "profile-update",
   },
   {
     path: "/conversations/list",
-    method: "GET",
+    method: HttpMethod.GET,
     lambdaName: "list-my-conversations",
   },
   {
     path: "/conversations/create",
-    method: "POST",
+    method: HttpMethod.POST,
     lambdaName: "create-personal-conversation",
   },
   {
     path: "/conversations/delete",
-    method: "DELETE",
+    method: HttpMethod.DELETE,
     lambdaName: "delete-personal-conversation",
   },
   {
     path: "/conversations/read",
-    method: "GET",
+    method: HttpMethod.GET,
     lambdaName: "conversation-read-messages",
   },
   {
     path: "/conversations/append",
-    method: "POST",
+    method: HttpMethod.POST,
     lambdaName: "conversation-add-message",
   },
   {
     path: "/groups/list",
-    method: "GET",
+    method: HttpMethod.GET,
     lambdaName: "groups-list",
   },
   {
     path: "/groups/create",
-    method: "POST",
+    method: HttpMethod.POST,
     lambdaName: "groups-create",
   },
   {
     path: "/groups/delete",
-    method: "DELETE",
+    method: HttpMethod.DELETE,
     lambdaName: "groups-delete",
   },
   {
     path: "/groups/read",
-    method: "GET",
+    method: HttpMethod.GET,
     lambdaName: "groups-read-messages",
   },
   {
     path: "/groups/append",
-    method: "POST",
+    method: HttpMethod.POST,
     lambdaName: "groups-add-message",
   },
 ];
@@ -127,9 +128,9 @@ export class AngularCourseStack extends cdk.Stack {
             bundling: {
               externalModules: ["@aws-sdk/*"],
             },
-          }),
+          })
         ),
-        routeKey: apiv2.HttpRouteKey.with("/"),
+        routeKey: apiv2.HttpRouteKey.with(route.path, route.method),
       });
     }
 
@@ -176,13 +177,13 @@ export class AngularCourseStack extends cdk.Stack {
             minimumProtocolVersion: "TLSv1.2_2019",
           },
         },
-      },
+      }
     );
 
     // Create a DNS record. in Production it will be an apex record, otherwise we set recordName
     new route53.ARecord(this, "AliasRecord", {
       target: route53.RecordTarget.fromAlias(
-        new alias.CloudFrontTarget(distribution),
+        new alias.CloudFrontTarget(distribution)
       ),
       zone: route53.HostedZone.fromLookup(this, "HostedZone", {
         domainName: "rs.school",
