@@ -114,6 +114,8 @@ export class AngularCourseStack extends cdk.Stack {
     this.fqdn = `tasks.app.rs.school`;
     this.url = `https://${this.fqdn}`;
 
+    const baseUrl = "/angular";
+
     const httpApi = new apiv2.HttpApi(this, "AngularTask");
 
     for (const route of angularTaskApi) {
@@ -130,7 +132,10 @@ export class AngularCourseStack extends cdk.Stack {
             },
           })
         ),
-        routeKey: apiv2.HttpRouteKey.with(route.path, route.method),
+        routeKey: apiv2.HttpRouteKey.with(
+          `${baseUrl}${route.path}`,
+          route.method
+        ),
       });
     }
 
@@ -191,6 +196,6 @@ export class AngularCourseStack extends cdk.Stack {
       recordName: this.fqdn,
     });
 
-    new CfnOutput(this, "Url", { value: this.url });
+    new CfnOutput(this, "API Url", { value: `${this.url}${baseUrl}` });
   }
 }
