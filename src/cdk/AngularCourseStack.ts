@@ -235,6 +235,7 @@ export class AngularCourseStack extends cdk.Stack {
         origin: new origins.HttpOrigin(
           `${httpApi.httpApiId}.execute-api.${this.region}.amazonaws.com`
         ),
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         responseHeadersPolicy:
           cloudfront.ResponseHeadersPolicy
             .CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT_AND_SECURITY_HEADERS,
