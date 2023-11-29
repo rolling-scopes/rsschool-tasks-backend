@@ -3,10 +3,14 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as alias from "aws-cdk-lib/aws-route53-targets";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
+
 import * as apiv2 from "@aws-cdk/aws-apigatewayv2-alpha";
 import * as integration from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
+
 import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Runtime, Architecture } from "aws-cdk-lib/aws-lambda";
@@ -229,51 +233,24 @@ export class AngularCourseStack extends cdk.Stack {
       });
     }
 
-    const noCacheBehavior: cloudfront.Behavior = {
-      allowedMethods: cloudfront.CloudFrontAllowedMethods.ALL,
-      defaultTtl: cdk.Duration.seconds(0),
-      minTtl: cdk.Duration.seconds(0),
-      maxTtl: cdk.Duration.seconds(0),
-      forwardedValues: {
-        queryString: true,
-        headers: ["Origin", "Authorization"],
-        cookies: {
-          forward: "all",
-        },
+    const distribution = new cloudfront.Distribution(this, "Tasks", {
+      defaultBehavior: {
+        origin: new origins.HttpOrigin(
+          `${httpApi.httpApiId}.execute-api.${this.region}.amazonaws.com`
+        ),
+        responseHeadersPolicy:
+          cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS,
+        cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
-    };
-
-    const distribution = new cloudfront.CloudFrontWebDistribution(
-      this,
-      "Tasks",
-      {
-        originConfigs: [
-          {
-            customOriginSource: {
-              domainName: `${httpApi.httpApiId}.execute-api.${this.region}.amazonaws.com`,
-              originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTPS_ONLY,
-            },
-            behaviors: [
-              {
-                isDefaultBehavior: true,
-                pathPattern: "/angular/*",
-                ...noCacheBehavior,
-              },
-            ],
-          },
-        ],
-        defaultRootObject: "/",
-        viewerCertificate: {
-          aliases: [this.fqdn],
-          props: {
-            // cloudfront needs certificate in us-east-1 so we pass it as string
-            acmCertificateArn: certificateArn,
-            sslSupportMethod: "sni-only",
-            minimumProtocolVersion: "TLSv1.2_2019",
-          },
-        },
-      }
-    );
+      domainNames: [this.fqdn],
+      certificate: acm.Certificate.fromCertificateArn(
+        this,
+        "certificate",
+        certificateArn
+      ),
+    });
 
     // Create a DNS record. in Production it will be an apex record, otherwise we set recordName
     new route53.ARecord(this, "AliasRecord", {
