@@ -121,7 +121,13 @@ export class AngularCourseStack extends cdk.Stack {
 
     const baseUrl = "/angular";
 
-    const httpApi = new apiv2.HttpApi(this, "AngularTask");
+    const httpApi = new apiv2.HttpApi(this, "AngularTask", {
+      corsPreflight: {
+        allowOrigins: ["*"],
+        allowHeaders: ["*"],
+        allowMethods: [apiv2.CorsHttpMethod.ANY],
+      },
+    });
 
     const usersTable = dynamodb.Table.fromTableName(
       this,
@@ -230,9 +236,11 @@ export class AngularCourseStack extends cdk.Stack {
           `${httpApi.httpApiId}.execute-api.${this.region}.amazonaws.com`
         ),
         responseHeadersPolicy:
-          cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS,
+          cloudfront.ResponseHeadersPolicy
+            .CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT_AND_SECURITY_HEADERS,
         cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
-        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+        originRequestPolicy:
+          cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       domainNames: [this.fqdn],
