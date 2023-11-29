@@ -232,7 +232,6 @@ export class AngularCourseStack extends cdk.Stack {
         responseHeadersPolicy:
           cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS,
         cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
-        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       domainNames: [this.fqdn],
