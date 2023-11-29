@@ -123,32 +123,23 @@ export class AngularCourseStack extends cdk.Stack {
 
     const httpApi = new apiv2.HttpApi(this, "AngularTask");
 
-    const usersTable = new dynamodb.Table(this, "UsersTable", {
-      tableName: "rsschool-2023-users",
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      partitionKey: {
-        name: "email",
-        type: dynamodb.AttributeType.STRING,
-      },
-    });
+    const usersTable = dynamodb.Table.fromTableName(
+      this,
+      "UsersTable",
+      "rsschool-2023-users"
+    );
 
-    const groupsTable = new dynamodb.Table(this, "GroupsTable", {
-      tableName: "rsschool-2023-groups",
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      partitionKey: {
-        name: "id",
-        type: dynamodb.AttributeType.STRING,
-      },
-    });
+    const groupsTable = dynamodb.Table.fromTableName(
+      this,
+      "GroupsTable",
+      "rsschool-2023-groups"
+    );
 
-    const conversationsTable = new dynamodb.Table(this, "ConversationsTable", {
-      tableName: "rsschool-2023-conversations",
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      partitionKey: {
-        name: "id",
-        type: dynamodb.AttributeType.STRING,
-      },
-    });
+    const conversationsTable = dynamodb.Table.fromTableName(
+      this,
+      "ConversationsTable",
+      "rsschool-2023-conversations"
+    );
 
     const lambdaRole = new iam.Role(this, `AngularTaskLambdaRole`, {
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
