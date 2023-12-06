@@ -18,6 +18,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     return {
       statusCode: 400,
       body: JSON.stringify({
+        type: "InvalidUserDataException",
         message:
           'Header should contain "rs-email", "rs-uid" and "Authorization" parameters.',
       }),
@@ -30,6 +31,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     return {
       statusCode: 400,
       body: JSON.stringify({
+        type: "InvalidTokenException",
         message:
           'Header should contain "Authorization" parameter with Bearer code.',
       }),
@@ -42,6 +44,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     return {
       statusCode: 400,
       body: JSON.stringify({
+        type: "InvalidFormDataException",
         message: '"conversationID" parameter should be in query list.',
       }),
     };
