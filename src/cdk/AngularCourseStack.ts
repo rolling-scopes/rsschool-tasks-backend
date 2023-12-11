@@ -243,7 +243,10 @@ export class AngularCourseStack extends cdk.Stack {
     const distribution = new cloudfront.Distribution(this, "Tasks", {
       defaultBehavior: {
         origin: new origins.HttpOrigin(
-          `${httpApi.httpApiId}.execute-api.${this.region}.amazonaws.com`
+          `${httpApi.httpApiId}.execute-api.${this.region}.amazonaws.com`,
+          {
+            originPath: "/angular",
+          }
         ),
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         responseHeadersPolicy:
