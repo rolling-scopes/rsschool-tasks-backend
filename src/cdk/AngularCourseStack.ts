@@ -5,8 +5,14 @@ import * as route53 from "aws-cdk-lib/aws-route53";
 import * as alias from "aws-cdk-lib/aws-route53-targets";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 
-import * as apiv2 from "@aws-cdk/aws-apigatewayv2-alpha";
-import * as integration from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
+import {
+  HttpMethod,
+  HttpApi,
+  CorsHttpMethod,
+  HttpRoute,
+  HttpRouteKey,
+} from "aws-cdk-lib/aws-apigatewayv2";
+import * as integration from "aws-cdk-lib/aws-apigatewayv2-integrations";
 
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
@@ -14,7 +20,6 @@ import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Runtime, Architecture } from "aws-cdk-lib/aws-lambda";
-import { HttpMethod } from "@aws-cdk/aws-apigatewayv2-alpha";
 
 type Props = cdk.StackProps & {
   certificateArn: string;
@@ -121,11 +126,19 @@ export class AngularCourseStack extends cdk.Stack {
 
     const baseUrl = "/angular";
 
-    const httpApi = new apiv2.HttpApi(this, "AngularTask", {
+    const httpApi = new HttpApi(this, "AngularTask", {
       corsPreflight: {
         allowOrigins: ["*"],
         allowHeaders: ["*"],
-        allowMethods: [apiv2.CorsHttpMethod.ANY],
+        allowMethods: [CorsHttpMethod.ANY],
+      },
+    });
+
+    httpApi.addStage("angular", {
+      autoDeploy: true,
+      stageName: "angular",
+      throttle: {
+        rateLimit: 1,
       },
     });
 
@@ -217,16 +230,13 @@ export class AngularCourseStack extends cdk.Stack {
           architecture: Architecture.ARM_64,
         }
       );
-      new apiv2.HttpRoute(this, `Route-${route.path}-${route.method}`, {
+      new HttpRoute(this, `Route-${route.path}-${route.method}`, {
         httpApi,
         integration: new integration.HttpLambdaIntegration(
           `Integration-${route.path}-${route.method}`,
           lambda
         ),
-        routeKey: apiv2.HttpRouteKey.with(
-          `${baseUrl}${route.path}`,
-          route.method
-        ),
+        routeKey: HttpRouteKey.with(`${baseUrl}${route.path}`, route.method),
       });
     }
 
