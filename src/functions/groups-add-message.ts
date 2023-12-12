@@ -1,5 +1,5 @@
 import querystring from "querystring";
-import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, PutItemCommand, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 
 const client = new DynamoDBClient({ region: "eu-central-1" });
@@ -129,6 +129,25 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     console.log("-result", result);
   } catch (err) {
     if ((err as Error).name === "ResourceNotFoundException") {
+      // new group could not be created so quickly
+      const input = {
+        TableName: "rsschool-2023-groups",
+        Key: {
+          id: {
+            S: data.groupID,
+          },
+        },
+      };
+
+      const verifyCommand = new GetItemCommand(input);
+      const result = await client.send(verifyCommand);
+
+      console.log('-verify', result);
+
+      if (result.Item) {
+        return { statusCode: 400, body: JSON.stringify({ type: 'RoomReadyException', message: `Group with id "${data.groupID}" seems not ready yet` }) };
+      }
+
       return {
         statusCode: 400,
         body: JSON.stringify({
