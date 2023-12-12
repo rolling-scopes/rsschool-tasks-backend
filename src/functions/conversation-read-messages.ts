@@ -2,6 +2,7 @@ import {
   DynamoDBClient,
   ScanCommand,
   ScanCommandInput,
+    GetItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 
@@ -87,6 +88,25 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     };
   } catch (err) {
     if ((err as Error).name === "ResourceNotFoundException") {
+      // new conversation could not be created so quickly
+      const input = {
+        TableName: "rsschool-2023-conversations",
+        Key: {
+          id: {
+            S: conversationID,
+          },
+        },
+      };
+
+      const verifyCommand = new GetItemCommand(input);
+      const result = await client.send(verifyCommand);
+
+      console.log('-verify', result);
+
+      if (result.Item) {
+        return { statusCode: 200, body: JSON.stringify([]) };
+      }
+
       return {
         statusCode: 400,
         body: JSON.stringify({
