@@ -104,7 +104,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
       console.log('-verify', result);
 
       if (result.Item) {
-        return { statusCode: 200, body: JSON.stringify([]) };
+        return { statusCode: 200, body: JSON.stringify({Count: 0, ScannedCount: 0, Items: []}) };
       }
 
       return {
