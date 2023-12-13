@@ -138,7 +138,7 @@ export class AngularCourseStack extends cdk.Stack {
       autoDeploy: true,
       stageName: "angular",
       throttle: {
-        rateLimit: 1,
+        rateLimit: 10,
       },
     });
 
