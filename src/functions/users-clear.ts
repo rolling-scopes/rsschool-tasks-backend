@@ -29,7 +29,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         const deleteItemQuery = client.send(deleteItemCommand);
 
 
-        return deleteItemQuery.then(res => ({email, result: res.status === 'fulfilled' ? res.value : res.reason}));
+        return deleteItemQuery.then(res => ({email, recordDeleted: res}), reason => ({email, recordDeleted: reason}));
     });
 
     const response = await Promise.allSettled(deleteRequests);

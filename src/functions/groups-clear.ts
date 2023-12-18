@@ -34,7 +34,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         const deleteTableQuery = client.send(deleteTableCommand);
 
 
-        return Promise.allSettled([deleteItemQuery, deleteTableQuery]).then(res => ({groupID, result: res.status === 'fulfilled' ? res.value : res.reason}));
+        return Promise.allSettled([deleteItemQuery, deleteTableQuery]).then(res => ({groupID, tableDeleted: res[1].status === 'fulfilled' ? res[1].value : res[1].reason, recordDeleted: res[0].status === 'fulfilled' ? res[0].value : res[0].reason}));
     });
 
     const response = await Promise.allSettled(deleteRequests);
