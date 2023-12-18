@@ -51,6 +51,11 @@ const angularTaskApi: {
     lambdaName: "users",
   },
   {
+    path: "/users/clear",
+    method: HttpMethod.DELETE,
+    lambdaName: "users-clear",
+  },
+  {
     path: "/profile",
     method: HttpMethod.GET,
     lambdaName: "profile-read",
@@ -76,6 +81,11 @@ const angularTaskApi: {
     lambdaName: "delete-personal-conversation",
   },
   {
+    path: "/conversations/clear",
+    method: HttpMethod.DELETE,
+    lambdaName: "conversations-clear",
+  },
+  {
     path: "/conversations/read",
     method: HttpMethod.GET,
     lambdaName: "conversation-read-messages",
@@ -99,6 +109,11 @@ const angularTaskApi: {
     path: "/groups/delete",
     method: HttpMethod.DELETE,
     lambdaName: "groups-delete",
+  },
+  {
+    path: "/groups/clear",
+    method: HttpMethod.DELETE,
+    lambdaName: "groups-clear",
   },
   {
     path: "/groups/read",

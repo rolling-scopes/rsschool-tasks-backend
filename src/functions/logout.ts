@@ -72,7 +72,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
 
     if ((err as Error).name === "ConditionalCheckFailedException") {
       return {
-        statusCode: 400,
+        statusCode: 401,
         body: JSON.stringify({
           type: "InvalidTokenException",
           message: "Current session token is not valid.",
