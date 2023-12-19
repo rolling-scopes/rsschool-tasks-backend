@@ -131,7 +131,14 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
   };
 
   const queryCommand = new ScanCommand(queryInput);
-  let result = await client.send(queryCommand);
+
+  let result;
+
+  try {
+    result = await client.send(queryCommand);
+  } catch (err) {
+    return { statusCode: 500, body: JSON.stringify(err), };
+  }
 
   if (result.Count > 0) {
     // conversation between people already exists
@@ -170,7 +177,11 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
   };
   const newTableCommand = new CreateTableCommand(newTableInput);
 
-  result = await client.send(newTableCommand);
+  try {
+    result = await client.send(newTableCommand);
+  } catch (err) {
+    return { statusCode: 500, body: JSON.stringify(err), };
+  }
 
   // save conversation id in list
   const input = {
@@ -194,7 +205,11 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
 
   const command = new PutItemCommand(input);
 
-  result = await client.send(command);
+  try {
+    result = await client.send(command);
+  } catch (err) {
+    return { statusCode: 500, body: JSON.stringify(err), };
+  }
 
   return {
     statusCode: 201,
