@@ -115,7 +115,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         }),
       };
     } else if ((err as Error).name === 'ValidationException') {
-      return { statusCode: 400, body: JSON.stringify({ type: 'InvalidFormDataException', message: 'Validation of "conversationID" parameter failed' }) };
+      return { statusCode: 400, body: JSON.stringify({ type: 'InvalidFormDataException', message: 'Validation of "groupID" parameter failed' }) };
     }
 
     throw err;

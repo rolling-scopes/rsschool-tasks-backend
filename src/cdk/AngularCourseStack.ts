@@ -71,6 +71,11 @@ const angularTaskApi: {
     lambdaName: "list-my-conversations",
   },
   {
+    path: "/conversations/count",
+    method: HttpMethod.GET,
+    lambdaName: "conversations-count",
+  },
+  {
     path: "/conversations/create",
     method: HttpMethod.POST,
     lambdaName: "create-personal-conversation",
@@ -185,6 +190,14 @@ export class AngularCourseStack extends cdk.Stack {
               resources: ["arn:aws:logs:*:*:*"],
             }),
           ],
+        }),
+        listTables: new iam.PolicyDocument({
+          statements: [
+              new iam.PolicyStatement({
+                actions: ["dynamodb:ListTables"],
+                resources: ["*"]
+              })
+          ]
         }),
         lambdaRole: new iam.PolicyDocument({
           statements: [
