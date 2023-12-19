@@ -135,7 +135,11 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
   };
   const newTableCommand = new CreateTableCommand(newTableInput);
 
-  await client.send(newTableCommand);
+  try {
+    await client.send(newTableCommand);
+  } catch (err) {
+    return { statusCode: 500, body: JSON.stringify(err) };
+  }
 
   // save conversation id in list
   const input = {
@@ -159,7 +163,11 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
 
   const command = new PutItemCommand(input);
 
-  await client.send(command);
+  try {
+    await client.send(command);
+  } catch (err) {
+    return { statusCode: 500, body: JSON.stringify(err), };
+  }
 
   return {
     statusCode: 201,

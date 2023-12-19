@@ -114,6 +114,8 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
           message: `Conversation with id "${conversationID}" does not exist or was deleted before.`,
         }),
       };
+    } else if ((err as Error).name === 'ValidationException') {
+      return { statusCode: 400, body: JSON.stringify({ type: 'InvalidFormDataException', message: 'Validation of "conversationID" parameter failed' }) };
     }
 
     throw err;
