@@ -15,7 +15,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     });
     const result = await client.send(getCommand);
 
-    let tables: string[] = [];
+    const tables: string[] = [];
     let lastTable;
 
     do {
