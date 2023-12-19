@@ -16,7 +16,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     });
     const result = await client.send(getCommand);
 
-    const deleteRequests = result.Items.map(item => {
+    const deleteRequests = result.Items.slice(0, 100).map(item => {
         const conversationID = item.id.S;
 
         const deleteItemCommand = new DeleteItemCommand({
