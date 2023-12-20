@@ -2,7 +2,7 @@ import {
   DynamoDBClient,
   ScanCommand,
   ScanCommandInput,
-    GetItemCommand,
+  GetItemCommand, QueryCommand,
 } from "@aws-sdk/client-dynamodb";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 
@@ -52,6 +52,51 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     };
   }
   console.log("-conversation", conversationID, since);
+
+
+
+  // verify user's credentials
+  const profileCommand = new QueryCommand({
+    TableName: "rsschool-2023-users",
+    ProjectionExpression: "#E, #CA, #N, #UID",
+    ExpressionAttributeNames: {
+      "#E": "email",
+      "#CA": "createdAt",
+      "#N": "name",
+      "#UID": "uid",
+      "#T": "token",
+    },
+    ExpressionAttributeValues: {
+      ":email": {
+        S: userEmail,
+      },
+      ":uid": {
+        S: userID,
+      },
+
+      ":token": {
+        S: userToken,
+      },
+    },
+    KeyConditionExpression: "#E = :email",
+    FilterExpression: "#T = :token AND #UID = :uid",
+  });
+
+  const result = await client.send(profileCommand);
+
+  if (result.Count !== 1) {
+    console.log("-result", result);
+
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        type: "InvalidTokenException",
+        message: "User was not found",
+      }),
+    };
+  }
+
+
 
   let input: ScanCommandInput = {
     TableName: `conversation-${conversationID}`,

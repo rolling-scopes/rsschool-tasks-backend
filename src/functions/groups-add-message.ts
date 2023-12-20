@@ -1,5 +1,5 @@
 import querystring from "querystring";
-import { DynamoDBClient, PutItemCommand, GetItemCommand } from "@aws-sdk/client-dynamodb";
+import {DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand} from "@aws-sdk/client-dynamodb";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 
 const client = new DynamoDBClient({ region: "eu-central-1" });
@@ -106,6 +106,52 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
       }),
     };
   }
+
+
+
+
+  // verify user's credentials
+  const profileCommand = new QueryCommand({
+    TableName: "rsschool-2023-users",
+    ProjectionExpression: "#E, #CA, #N, #UID",
+    ExpressionAttributeNames: {
+      "#E": "email",
+      "#CA": "createdAt",
+      "#N": "name",
+      "#UID": "uid",
+      "#T": "token",
+    },
+    ExpressionAttributeValues: {
+      ":email": {
+        S: userEmail,
+      },
+      ":uid": {
+        S: userID,
+      },
+
+      ":token": {
+        S: userToken,
+      },
+    },
+    KeyConditionExpression: "#E = :email",
+    FilterExpression: "#T = :token AND #UID = :uid",
+  });
+
+  const profileResult = await client.send(profileCommand);
+
+  if (profileResult.Count !== 1) {
+    console.log("-profile result", profileResult);
+
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        type: "InvalidTokenException",
+        message: "User was not found",
+      }),
+    };
+  }
+
+
 
   const command = new PutItemCommand({
     TableName: `group-${data.groupID}`,
