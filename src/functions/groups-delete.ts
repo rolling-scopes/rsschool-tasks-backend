@@ -1,7 +1,7 @@
 import {
   DynamoDBClient,
   DeleteItemCommand,
-  DeleteTableCommand,
+  DeleteTableCommand, QueryCommand,
 } from "@aws-sdk/client-dynamodb";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 
@@ -50,6 +50,52 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     };
   }
   console.log("-conversation", groupID);
+
+
+
+
+  // verify user's credentials
+  const profileCommand = new QueryCommand({
+    TableName: "rsschool-2023-users",
+    ProjectionExpression: "#E, #CA, #N, #UID",
+    ExpressionAttributeNames: {
+      "#E": "email",
+      "#CA": "createdAt",
+      "#N": "name",
+      "#UID": "uid",
+      "#T": "token",
+    },
+    ExpressionAttributeValues: {
+      ":email": {
+        S: userEmail,
+      },
+      ":uid": {
+        S: userID,
+      },
+
+      ":token": {
+        S: userToken,
+      },
+    },
+    KeyConditionExpression: "#E = :email",
+    FilterExpression: "#T = :token AND #UID = :uid",
+  });
+
+  const profileResult = await client.send(profileCommand);
+
+  if (profileResult.Count !== 1) {
+    console.log("-profile result", profileResult);
+
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        type: "InvalidTokenException",
+        message: "User was not found",
+      }),
+    };
+  }
+
+
 
   const deleteItemCommand = new DeleteItemCommand({
     TableName: "rsschool-2023-groups",
